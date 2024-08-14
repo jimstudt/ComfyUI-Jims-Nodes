@@ -27,7 +27,7 @@ class CropChestNode:
 
     FUNCTION = "execute"
     OUTPUT_NODE = True
-    CATEGORY = "image/processing"
+    CATEGORY = "Jims/Zoom"
 
     def execute(self, image, segs, aspect_ratio):
         seg_hdr = segs[0]
