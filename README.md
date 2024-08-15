@@ -16,15 +16,18 @@ having that mess on my screen... It's just got to be easier to write my own.
 
 ### Zoom and Enhance Nodes
 
-#### Crop Chest Node
+#### Zoom On Segment
 
-Find the biggest face. Assume the person is upright. Make a crop which likely
-contains their chest and face. (Shh you perverts, I'm making random necklaces.
-And exploring zooming in and enhancing from wider pictures. You will be sad,
-it is tuned to try to be above the boobs.)
+Find the largest segment in the segs and crop the image to it. You can 
+specify a padding percentage for each side.
 
-I expect I will make a more complicated "zoom and enhance" node with
-flexible targeting, but I'm learning on this one.
+You also get to specify about how many megapixels you want the cropped
+image to ultimately be. That is used to compute the "upscale_by"
+output which is just perfect for running into The Ultimate Upscaler.
+
+Use this to crop to your main character in a larger scene, or to their
+face.  For faces you probably want the bottom pad to be larger than
+the others.
 
 ### String Lists
 
