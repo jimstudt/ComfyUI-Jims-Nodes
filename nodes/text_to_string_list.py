@@ -34,11 +34,10 @@ class TextToStringList:
         # both lists now.
         text = '\n'.join(text)
 
-        print( text, prefix)
         result = [
             stripped_line
             for line in text.splitlines()
-            if (stripped_line := line.strip()) and not stripped_line.startswith('#')
+            if (stripped_line := line.strip()) and stripped_line != '' and not stripped_line.startswith('#')
         ]
 
         # probably should strip the non-strings from prefix
