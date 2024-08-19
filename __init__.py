@@ -1,6 +1,7 @@
 from .nodes.zoom_focus import *
 from .nodes.text_to_string_list import *
 from .nodes.dictionaries import *
+from .nodes.cubby import *
 
 NODE_CLASS_MAPPINGS = {
     "ZoomFocus" : ZoomFocus,
@@ -9,7 +10,9 @@ NODE_CLASS_MAPPINGS = {
 
     "DefineWord": DefineWord,
     "LookupWord": LookupWord,
-    "ReplaceWords": ReplaceWords
+    "ReplaceWords": ReplaceWords,
+
+    "Cubby": Cubby
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -20,5 +23,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
     "DefineWord": "Define Word",
     "LookupWord": "Lookup Word",
-    "ReplaceWords": "Substitute Words"
+    "ReplaceWords": "Substitute Words",
+
+    "Cubby" : "CubbyHack"
 }
