@@ -72,6 +72,12 @@ Keylength order prevents EYE from matching EYECOLOR.
 
 Passes through the dictionary for your chaining pleasure.
 
+#### Load Image and Info from Path
+
+Take a file pathname as a string, and load the image and its prompt,
+workflow, and extra info blocks as dictionaries. The GIR Loopy Dir node
+is one way to get a list of paths. The 'extra' information can come if
+you used 'Save image with extra metadata' when you saved it.
 
 ## TODO
 

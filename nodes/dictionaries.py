@@ -16,6 +16,13 @@
 # are detailing a cat's fur, you can have a much more focused prompt string, but
 # keep the elements critical to fur.
 #
+from PIL import Image, ImageOps
+import torch
+import numpy as np
+import os
+import json
+import yaml
+import re
 
 class DefineWord:
     def __init__(self, device="cpu"):
@@ -124,3 +131,66 @@ class ReplaceWords:
         #       I can find no documentation.
         return ( dictionary, source,  {"ui": {"text": source}} )
     
+class LoadImageAndInfoFromPath:
+    def __init__(self, device="cpu"):
+        self.device = device
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            'required': {
+                'image_path': ( "STRING", {}),
+            },
+        }
+
+    RETURN_TYPES = ("IMAGE","DICT","DICT","DICT")
+    RETURN_NAMES = ("image","prompt", "workflow", "extra")
+    OUTPUT_IS_LIST = (False,False,False,False)
+
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    CATEGORY = "Jims/Text"
+
+    def execute(self, image_path):
+        #
+        # Some sociopathic programmer has been making JSON with apostrophes instead of quotes.
+        # So this mess is to catch him and fix it.  It also handles where the JSON has been double encoded
+        # as a string.Because that guy really is a sociopath.
+        #
+        def decode_sloppy_json(source, fix = True):
+            try:
+                print( f"SSSS: {source}")
+                result = json.loads(source)
+                if isinstance(result, str):
+                    return decode_sloppy_json(result)  # If result is a string, try to decode it again
+                return result
+            except json.JSONDecodeError:
+                if not fix:
+                    raise 
+                corrected_source = re.sub(r"(?<!\\)'", '"', source)
+                return decode_sloppy_json( corrected_source, fix = False)
+
+
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"File '{image_path}' cannot be found.")
+
+        if image := Image.open(image_path):
+            image = ImageOps.exif_transpose(image)
+            img = image.convert("RGB")
+            img = np.array(img).astype(np.float32) / 255.0
+            img = torch.from_numpy(img)[None,]
+
+
+            if info := image.info:
+                prompt = decode_sloppy_json( info.get("prompt","{}"))
+                workflow = decode_sloppy_json( info.get("workflow","{}"))
+                extra = decode_sloppy_json( info.get("extra","{}"))
+
+                print( f"EXTRA: {extra}")
+                
+                return { "result": ( img, prompt, workflow, extra) }
+
+            else:
+                return { "result":(img, {},{},{}) }
+
+        raise ValueError(f"Can't open image: {image_path}")

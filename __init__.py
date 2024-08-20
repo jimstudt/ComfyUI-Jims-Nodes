@@ -7,11 +7,12 @@ NODE_CLASS_MAPPINGS = {
     "ZoomFocus" : ZoomFocus,
     "TextToStringList": TextToStringList,
     "ChooseFromStringList": ChooseFromStringList,
-
+    
     "DefineWord": DefineWord,
     "LookupWord": LookupWord,
     "ReplaceWords": ReplaceWords,
-
+    "LoadImageAndInfoFromPath": LoadImageAndInfoFromPath,
+    
     "Cubby": Cubby
 }
 
@@ -24,6 +25,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DefineWord": "Define Word",
     "LookupWord": "Lookup Word",
     "ReplaceWords": "Substitute Words",
+    "LoadImageAndInfoFromPath": "Load Image And Info From Path",
 
     "Cubby" : "CubbyHack"
 }
