@@ -11,6 +11,8 @@ NODE_CLASS_MAPPINGS = {
     "DefineWord": DefineWord,
     "LookupWord": LookupWord,
     "ReplaceWords": ReplaceWords,
+    "DictionaryToJSON": DictionaryExport,
+    "JSONToDictionary": DefineFromPath,
     "LoadImageAndInfoFromPath": LoadImageAndInfoFromPath,
     
     "Cubby": Cubby
@@ -25,6 +27,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DefineWord": "Define Word",
     "LookupWord": "Lookup Word",
     "ReplaceWords": "Substitute Words",
+    "DictionaryToJSON": "Dictionary to JSON",
+    "JSONTODictionary": "JSON to Dictionary",
     "LoadImageAndInfoFromPath": "Load Image And Info From Path",
 
     "Cubby" : "CubbyHack"

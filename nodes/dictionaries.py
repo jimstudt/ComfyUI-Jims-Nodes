@@ -24,6 +24,31 @@ import json
 import yaml
 import re
 
+class DictionaryExport:
+    def __init__(self, device="cpu"):
+        self.device = device
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            'required': {
+                'dictionary': ( "DICT", {"forceInput": True}),
+            },
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("json",)
+    OUTPUT_IS_LIST = (False,)
+    
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    
+    CATEGORY = "Jims/Text"
+
+    def execute(self, dictionary):
+        return ( json.dumps(dictionary), )
+    
+
 class DefineWord:
     def __init__(self, device="cpu"):
         self.device = device
@@ -51,7 +76,7 @@ class DefineWord:
             dictionary = {}
         else:
             dictionary = dictionary.copy()  # Make a shallow copy of the original dictionary
-    
+
         dictionary[key] = value
 
         return (dictionary, )
@@ -130,6 +155,46 @@ class ReplaceWords:
         # Note: "ui" does nothing.  It would take Javascript somehow for the node.
         #       I can find no documentation.
         return ( dictionary, source,  {"ui": {"text": source}} )
+
+
+
+class DefineFromPath:
+    def __init__(self, device="cpu"):
+        self.device = device
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            'required': {
+                'json_path': ( "STRING", {}),
+            },
+        }
+
+    RETURN_TYPES = ("DICT",)
+    RETURN_NAMES = ("dictionary",)
+    OUTPUT_IS_LIST = (False,)
+
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    CATEGORY = "Jims/Text"
+
+    def execute(self, json_path):
+        try:
+            # Open and read the file
+            with open(json_path, 'r') as file:
+                data = json.load(file)
+        
+            # Ensure the loaded data is a dictionary
+            if not isinstance(data, dict):
+                return {}
+        
+            # Filter out any key-value pairs where the value is not a string
+            filtered_data = {k: v for k, v in data.items() if isinstance(v, str)}
+
+            return ( filtered_data, )
+    
+        except:
+            return {}
     
 class LoadImageAndInfoFromPath:
     def __init__(self, device="cpu"):
@@ -159,7 +224,6 @@ class LoadImageAndInfoFromPath:
         #
         def decode_sloppy_json(source, fix = True):
             try:
-                print( f"SSSS: {source}")
                 result = json.loads(source)
                 if isinstance(result, str):
                     return decode_sloppy_json(result)  # If result is a string, try to decode it again
@@ -186,8 +250,6 @@ class LoadImageAndInfoFromPath:
                 workflow = decode_sloppy_json( info.get("workflow","{}"))
                 extra = decode_sloppy_json( info.get("extra","{}"))
 
-                print( f"EXTRA: {extra}")
-                
                 return { "result": ( img, prompt, workflow, extra) }
 
             else:
