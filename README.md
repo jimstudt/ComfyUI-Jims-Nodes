@@ -77,7 +77,10 @@ Passes through the dictionary for your chaining pleasure.
 Take a file pathname as a string, and load the image and its prompt,
 workflow, and extra info blocks as dictionaries. The GIR Loopy Dir node
 is one way to get a list of paths. The 'extra' information can come if
-you used 'Save image with extra metadata' when you saved it.
+you used 'Save image with extra metadata' when you saved it. But, sadly, if
+you pass in a 'dict' then it rips it apart and puts that all at the top
+level of Image.info, so if that happened to you, there is an 'all' output
+which has a copy of Image.info itself.
 
 ## TODO
 

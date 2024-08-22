@@ -208,9 +208,9 @@ class LoadImageAndInfoFromPath:
             },
         }
 
-    RETURN_TYPES = ("IMAGE","DICT","DICT","DICT")
-    RETURN_NAMES = ("image","prompt", "workflow", "extra")
-    OUTPUT_IS_LIST = (False,False,False,False)
+    RETURN_TYPES = ("IMAGE","DICT","DICT","DICT", "DICT")
+    RETURN_NAMES = ("image","prompt", "workflow", "extra", "all_info")
+    OUTPUT_IS_LIST = (False,False,False,False,False)
 
     FUNCTION = "execute"
     OUTPUT_NODE = True
@@ -250,9 +250,9 @@ class LoadImageAndInfoFromPath:
                 workflow = decode_sloppy_json( info.get("workflow","{}"))
                 extra = decode_sloppy_json( info.get("extra","{}"))
 
-                return { "result": ( img, prompt, workflow, extra) }
+                return { "result": ( img, prompt, workflow, extra, info.copy()) }
 
             else:
-                return { "result":(img, {},{},{}) }
+                return { "result":(img, {},{},{}, {}) }
 
         raise ValueError(f"Can't open image: {image_path}")
