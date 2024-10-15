@@ -196,6 +196,48 @@ class DefineFromPath:
         except:
             return {}
     
+class DictFromJSON:
+    def __init__(self, device="cpu"):
+        self.device = device
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            'required': {
+                'jsontext': ( "JSON", {}),   # this is Crystools datatype
+            },
+        }
+
+    RETURN_TYPES = ("DICT",)
+    RETURN_NAMES = ("dictionary",)
+    OUTPUT_IS_LIST = (False,)
+
+    FUNCTION = "execute"
+    OUTPUT_NODE = True
+    CATEGORY = "Jims/Text"
+
+    def execute(self, jsontext):
+        try:
+            # Parse the JSON
+            data = json.loads(jsontext)
+            
+            # Ensure the loaded data is a dictionary
+            if not isinstance(data, dict):
+                return {}
+        
+            # Filter out any key-value pairs where the value is not a string
+            filtered_data = {k: v for k, v in data.items() if isinstance(v, str)}
+
+            return ( filtered_data, )
+    
+        except json.JSONDecodeError as e:
+            print(f"Failed to decode JSON: {e}")
+            return ( {}, )
+
+        except:
+            print("failed to read json to dict")
+            return ( {}, )
+    
 class LoadImageAndInfoFromPath:
     def __init__(self, device="cpu"):
         self.device = device
@@ -235,6 +277,15 @@ class LoadImageAndInfoFromPath:
                 return decode_sloppy_json( corrected_source, fix = False)
 
 
+        def cleandict(d):
+            cleaned_dict = {}
+            for key, value in d.items():
+                if isinstance(value, str):  # Check if the value is a string
+                    # Strip only if both the first and last character are double quotes
+                    cleaned_value = value.strip('"') if value.startswith('"') and value.endswith('"') else value
+                    cleaned_dict[key] = cleaned_value
+            return cleaned_dict
+
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"File '{image_path}' cannot be found.")
 
@@ -250,7 +301,7 @@ class LoadImageAndInfoFromPath:
                 workflow = decode_sloppy_json( info.get("workflow","{}"))
                 extra = decode_sloppy_json( info.get("extra","{}"))
 
-                return { "result": ( img, prompt, workflow, extra, info.copy()) }
+                return { "result": ( img, prompt, workflow, extra, cleandict(info)) }
 
             else:
                 return { "result":(img, {},{},{}, {}) }
