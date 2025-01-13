@@ -29,6 +29,35 @@ Use this to crop to your main character in a larger scene, or to their
 face.  For faces you probably want the bottom pad to be larger than
 the others.
 
+### Background Isolation Nodes
+
+#### Solid Background for Image
+
+Given an image, isolate the background, find the predominant color,
+and make an image the same size as the source, but a solid color
+matching the background.
+
+That might sound strange, but it is usefull for the next node which
+lifts an image off of its background.
+
+#### Lift Image and Mask from Background
+
+Given an image, mask covering the subject, and an assumed blank
+background (which you probably got with Solid Background for Image)...
+
+Make an image and mask where the subject comes across directly, but
+the background is represented as pixels with the most possible
+transparency which will yield the original image if composited on the
+background.
+
+You can use this to pick objects and their shadows off of a neutral
+background so you can composite them onto an image somewhere.
+
+It might not work well on detailed backgrounds, but if you are trying
+to make a pastable image, just get the AI to make your image on a
+background at least a little close to what you want and it should work
+well.
+
 ### String Lists
 
 #### Text To String List

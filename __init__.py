@@ -1,3 +1,4 @@
+
 from .nodes.zoom_focus import *
 from .nodes.text_to_string_list import *
 from .nodes.dictionaries import *
@@ -19,7 +20,8 @@ NODE_CLASS_MAPPINGS = {
     
     "Cubby": Cubby,
 
-    "ImageToSolidBackground": ImageToSolidBackground
+    "ImageToSolidBackground": ImageToSolidBackground,
+    "LiftFromBackground" : LiftFromBackground
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -38,5 +40,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
     "Cubby" : "CubbyHack",
 
-    "ImageToSolidBackground": "Image to Solid Background"
+    "ImageToSolidBackground": "Solid Background for Image",
+    "LiftFromBackground" : "Lift Image and Mask from background"
 }
+
