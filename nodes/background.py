@@ -69,63 +69,62 @@ class LiftFromBackground:
     @staticmethod
     def process(image, background, mask):
         """
-        Takes an image, background, and mask and computes the RGBA output.
+        Takes an image, background, and mask and computes the RGBA output using broadcasting.
         """
-        # Don't do batches, just take the singleton element
-        image_tensor = image[0]
-        background_tensor = background[0]
-        mask_tensor = mask[0]
+        # Remove the batch dimension (singleton batch)
+        image_tensor = image[0]  # Shape: [h, w, 3]
+        background_tensor = background[0]  # Shape: [h, w, 3]
+        mask_tensor = mask[0]  # Shape: [h, w]
 
+        # Print diagnostic information
         print(f"Image shape: {image_tensor.shape} of {image_tensor.dtype}")
         print(f"Background shape: {background_tensor.shape} of {background_tensor.dtype}")
         print(f"Mask shape: {mask_tensor.shape} of {mask_tensor.dtype}")
+
+        #
+        # I am sorry!!!! This was nice legible code that traversed the pixels by rows and columns,
+        # but was painfully slow.  I asked ChatGPT to rewrite it to use "broadcasting" in the torch
+        # sense.  And now it is this, which is blindingly fast to run, but a bit of a head scratcher to read.
         
         # Check for matching dimensions
         if image_tensor.shape != background_tensor.shape or image_tensor.shape[:2] != mask_tensor.shape:
             raise ValueError("Image, background, and mask must have the same width and height.")
 
-        height, width, _ = image_tensor.shape
+        # Expand the mask to broadcast across RGB channels
+        mask_expanded = mask_tensor.unsqueeze(-1).to(torch.float32)  # Shape: [h, w, 1]
 
-        # Create the output tensors
-        result_image = torch.zeros_like(image_tensor)
-        result_alpha = torch.zeros((height, width), dtype=torch.float32)
+        # Compute the needed alpha values
+        diff = image_tensor - background_tensor  # Element-wise difference [h, w, 3]
+        need_alpha = torch.zeros_like(diff)
 
-        dull_red = torch.tensor( [0.25, 0, 0], dtype=torch.float32 ).to( image_tensor.dtype)
+        # Case 1: where image == background (alpha = 0)
+        #  a null op, there is already a zero in need_alpha for this element.
+
+        # Case 2: where image > background (set result to 1.0)
+        brighter_mask = (image_tensor > background_tensor)
+        need_alpha[brighter_mask] = (diff[brighter_mask]) / (1.0 - background_tensor[brighter_mask])
+
+        # Case 3: where image < background (set result to 0.0)
+        darker_mask = (image_tensor < background_tensor)
+        need_alpha[darker_mask] = 1.0 - image_tensor[darker_mask] / background_tensor[darker_mask]
+
+        # At this point, need_alpha [h, w, 3] has the minimum required alpha for each channel of each pixel
         
-        # Process each pixel
-        for y in range(height):
-            for x in range(width):
-                if mask_tensor[y, x]:  # In mask: use image pixel and alpha 1.0
-                    result_image[y, x] = image_tensor[y, x]
-                    result_alpha[y, x] = 1.0
-                else:  # Not in mask: compute minimum alpha to match the image pixel
-                    need_alpha = torch.zeros_like( image_tensor[y,x])
-                    
-                    for ch in range(3):
-                        i = image_tensor[y,x,ch]
-                        bg = background_tensor[y,x,ch]
+        # Set alpha to the max across RGB channels
+        alpha = torch.clamp(need_alpha.max(dim=-1).values, 0.0, 1.0)  # Shape: [h, w]
 
-                        if i == bg:
-                            continue    # zero is fine
+        # Compute result image using broadcasting
+        alpha_expanded = alpha.unsqueeze(-1)  # Shape: [h, w, 1] for RGB broadcasting
+        # NOTE: That 1e-8 makes divide by zero be a huge number instead of an error. The upcoming clamp handles that.
+        result_image = (image_tensor - (1.0 - alpha_expanded) * background_tensor) / alpha_expanded.clamp(min=1e-8)
+        result_image = torch.clamp(result_image, 0.0, 1.0)  # Clamp to valid range
 
-                        if i > bg:
-                            need_alpha[ch] = (i - bg)/( 1.0 - bg) # i > bg :: bg != 1
-                        else:
-                            need_alpha[ch] = 1 - i / bg           # i < bg :: bg != 0
+        # Set final image and alpha in mask regions
+        result_image = torch.where(mask_expanded.bool(), image_tensor, result_image)
+        alpha = torch.where(mask_tensor.bool(), torch.ones_like(alpha), alpha)
 
-                    # We use the highest required alpha so all channels can get a solution
-                    alpha = need_alpha.max()
-
-                    for ch in range(3):
-                        i = image_tensor[y,x,ch]
-                        bg = background_tensor[y,x,ch]
-
-                        result_image[y,x,ch] = i/alpha - bg/alpha + bg
-
-                    result_alpha[y,x] = alpha
-
-        # Add back the batch dimension (singleton batch)
-        result_image = result_image.unsqueeze(0)  # Shape: [1, height, width, 3]
-        result_alpha = result_alpha.unsqueeze(0)  # Shape: [1, height, width]
+        # Add back the batch dimension
+        result_image = result_image.unsqueeze(0)  # Shape: [1, h, w, 3]
+        result_alpha = alpha.unsqueeze(0)  # Add back batch dimension
 
         return result_image, result_alpha
