@@ -2,6 +2,7 @@ from .nodes.zoom_focus import *
 from .nodes.text_to_string_list import *
 from .nodes.dictionaries import *
 from .nodes.cubby import *
+from .nodes.background import *
 
 NODE_CLASS_MAPPINGS = {
     "ZoomFocus" : ZoomFocus,
@@ -16,7 +17,9 @@ NODE_CLASS_MAPPINGS = {
     "DictFromJSON": DictFromJSON,
     "LoadImageAndInfoFromPath": LoadImageAndInfoFromPath,
     
-    "Cubby": Cubby
+    "Cubby": Cubby,
+
+    "ImageToSolidBackground": ImageToSolidBackground
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -33,5 +36,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "DictFromJSON": "JSON to Dictionary",
     "LoadImageAndInfoFromPath": "Load Image And Info From Path",
 
-    "Cubby" : "CubbyHack"
+    "Cubby" : "CubbyHack",
+
+    "ImageToSolidBackground": "Image to Solid Background"
 }
